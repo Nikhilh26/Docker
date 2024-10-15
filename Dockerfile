@@ -1,5 +1,4 @@
 FROM golang:1.20-alpine
 WORKDIR /app
 COPY . .
-RUN 
-CMD ["go","run","main.go"]
+RUN go mod tidy && go build -o ./server.exe
