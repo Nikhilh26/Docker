@@ -1,1 +1,15 @@
-Dockerfile
+# Ignore node_modules and build artifacts
+client-react/node_modules
+client-react/build
+
+# Ignore Dockerfile and .dockerignore themselves if they're in the client folder
+client-react/Dockerfile
+client-react/.dockerignore
+
+# Ignore log files
+*.log
+
+# Ignore any IDE or editor files
+.vscode/
+.idea/
+*.swp
