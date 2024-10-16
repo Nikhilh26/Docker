@@ -1,47 +1,36 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+const { MongoClient } = require('mongodb');
 
-const app = http.createServer((req, res) => {
-    let filePath = path.join(__dirname, 'dist', req.url === '/' ? 'index.html' : req.url);
-    const extname = String(path.extname(filePath)).toLowerCase();
-    const mimeTypes = {
-        '.html': 'text/html',
-        '.js': 'text/javascript',
-        '.css': 'text/css',
-        '.json': 'application/json',
-        '.png': 'image/png',
-        '.jpg': 'image/jpg',
-        '.gif': 'image/gif',
-        '.svg': 'image/svg+xml',
-        '.wav': 'audio/wav',
-        '.mp4': 'video/mp4',
-        '.woff': 'application/font-woff',
-        '.ttf': 'application/font-ttf',
-        '.eot': 'application/vnd.ms-fontobject',
-        '.otf': 'application/font-otf',
-        '.wasm': 'application/wasm',
-    };
+// MongoDB connection URL (use 'localhost' or appropriate host IP)
+const url = 'mongodb://admin:secret@mongodb:27017/my_database?authSource=admin';
 
-    const contentType = mimeTypes[extname] || 'application/octet-stream';
+// Specify the database name you want to connect to
+const dbName = 'your_database_name'; // Replace with your actual database name
 
-    fs.readFile(filePath, (error, content) => {
-        if (error) {
-            if (error.code == 'ENOENT') {
-                res.writeHead(404, { 'Content-Type': 'text/html' });
-                res.end('<h1>404 Not Found</h1>', 'utf-8');
-            } else {
-                res.writeHead(500);
-                res.end('Sorry, there was an error: ' + error.code + ' ..\n');
-            }
-        } else {
-            res.writeHead(200, { 'Content-Type': contentType });
-            res.end(content, 'utf-8');
-        }
-    });
-});
+const client = new MongoClient(url);
 
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-});
+async function connectToDatabase() {
+    console.log(dbName);
+    console.log(client);
+    console.log(url);
+    try {
+        // Connect to the MongoDB server
+        await client.connect();
+        console.log("Connected successfully to MongoDB");
+
+        // Select the database
+        const db = client.db(dbName);
+
+        // Fetch all collections
+        const collections = await db.listCollections().toArray();
+        console.log("Collections in the database:", collections);
+
+    } catch (err) {
+        console.error("Error connecting to MongoDB:", err);
+    } finally {
+        // Close the connection
+        await client.close();
+    }
+}
+
+connectToDatabase();
+// docker run -d  --name mongodb --network my_network  -p 27017:27017  -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=secret - e MONGO_INITDB_DATABASE=my_database mongo
